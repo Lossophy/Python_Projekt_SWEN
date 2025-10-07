@@ -2,7 +2,7 @@
 
 # <Project Title>
 
-In a few sentences describe what your project is trying to solve.
+In a few sentences describe what your project is trying to solve!
 
 You can use [GitHub markdown
 notation](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
