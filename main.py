@@ -35,7 +35,9 @@ class ReiseModel(db.Model):
         total = sum(len(k.gegenstaende) for k in self.kategorien)
         if total == 0:
             return 0.0
-        gepackt = sum(sum(1 for g in k.gegenstaende if g.gepackt) for k in self.kategorien)
+        gepackt = sum(
+            sum(1 for g in k.gegenstaende if g.gepackt) for k in self.kategorien
+        )
         return round(gepackt / total * 100.0, 2)
 
 
@@ -167,4 +169,3 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
