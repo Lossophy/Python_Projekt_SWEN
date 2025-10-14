@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Reisen - Reise-Packliste{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Reisen</h1>
+  <a class="btn btn-primary" href="{{ url_for('reise_neu_form') }}">Neue Reise</a>
+  </div>
+
+{% if reisen %}
+  <div class="list-group">
+    {% for reise in reisen %}
+      <a class="list-group-item list-group-item-action" href="{{ url_for('reise_detail', reise_id=reise.id) }}">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ reise.name }}</h5>
+          <small>{{ reise.startdatum }} - {{ reise.enddatum }}</small>
+        </div>
+        <p class="mb-1">{{ reise.beschreibung }}</p>
+        <small>Fortschritt: {{ reise.fortschritt_berechnen() }}%</small>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary">Noch keine Reisen angelegt.</div>
+{% endif %}
+{% endblock %}
+

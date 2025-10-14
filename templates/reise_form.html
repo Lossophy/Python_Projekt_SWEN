@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Neue Reise – Reise-Packliste{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Neue Reise anlegen</h1>
+<form method="post" action="{{ url_for('reise_neu_submit') }}" class="row g-3">
+  <div class="col-md-6">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" class="form-control" id="name" name="name" value="{{ form.name if form else '' }}" required />
+  </div>
+  <div class="col-md-3">
+    <label for="startdatum" class="form-label">Start</label>
+    <input type="date" class="form-control" id="startdatum" name="startdatum" value="{{ form.startdatum if form else '' }}" required />
+  </div>
+  <div class="col-md-3">
+    <label for="enddatum" class="form-label">Ende</label>
+    <input type="date" class="form-control" id="enddatum" name="enddatum" value="{{ form.enddatum if form else '' }}" required />
+  </div>
+  <div class="col-12">
+    <label for="beschreibung" class="form-label">Beschreibung</label>
+    <textarea class="form-control" id="beschreibung" name="beschreibung" rows="3">{{ form.beschreibung if form else '' }}</textarea>
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Speichern</button>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Abbrechen</a>
+  </div>
+  </form>
+{% endblock %}
+
