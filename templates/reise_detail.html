@@ -28,6 +28,7 @@
 
 {% if reise.kategorien %}
   {% for kat in reise.kategorien %}
+    {% set kat_index = loop.index0 %}
     <div class="card mb-3">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -40,7 +41,7 @@
             {% for g in kat.gegenstaende %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
-                  <form method="post" action="{{ url_for('toggle_gepackt', reise_id=reise_id, kat_index=loop.parent.index0, item_index=loop.index0) }}" class="d-inline">
+                  <form method="post" action="{{ url_for('toggle_gepackt', reise_id=reise_id, kat_index=kat_index, item_index=loop.index0) }}" class="d-inline">
                     <button class="btn btn-sm {{ 'btn-success' if g.gepackt else 'btn-outline-secondary' }}" type="submit" title="Gepackt umschalten">{{ '&#10003;'|safe if g.gepackt else '&#9675;'|safe }}</button>
                   </form>
                   <span class="ms-2">{{ g.name }}</span>
@@ -80,4 +81,3 @@
   </div>
   </div>
 {% endblock %}
-
