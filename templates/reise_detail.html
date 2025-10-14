@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}{{ reise.name }} – Reise-Packliste{% endblock %}
+{% block title %}{{ reise.name }} - Reise-Packliste{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h1 class="h3 mb-0">{{ reise.name }}</h1>
-    <small class="text-muted">{{ reise.startdatum }} – {{ reise.enddatum }}</small>
+    <small class="text-muted">{{ reise.startdatum }} - {{ reise.enddatum }}</small>
   </div>
-  <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Zurück</a>
+  <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Zurueck</a>
   </div>
 
 {% if reise.beschreibung %}
@@ -21,7 +21,7 @@
       <input type="text" class="form-control" id="kategorie_name" name="kategorie_name" placeholder="z. B. Kleidung, Technik" />
     </div>
     <div class="col-auto">
-      <button class="btn btn-primary" type="submit">Hinzufügen</button>
+      <button class="btn btn-primary" type="submit">Hinzufuegen</button>
     </div>
   </form>
 </div>
@@ -41,7 +41,7 @@
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <form method="post" action="{{ url_for('toggle_gepackt', reise_id=reise_id, kat_index=loop.parent.index0, item_index=loop.index0) }}" class="d-inline">
-                    <button class="btn btn-sm {{ 'btn-success' if g.gepackt else 'btn-outline-secondary' }}" type="submit" title="Gepackt umschalten">{{ '✓' if g.gepackt else '○' }}</button>
+                    <button class="btn btn-sm {{ 'btn-success' if g.gepackt else 'btn-outline-secondary' }}" type="submit" title="Gepackt umschalten">{{ '&#10003;'|safe if g.gepackt else '&#9675;'|safe }}</button>
                   </form>
                   <span class="ms-2">{{ g.name }}</span>
                 </div>
@@ -50,7 +50,7 @@
             {% endfor %}
           </ul>
         {% else %}
-          <div class="text-muted mb-3">Noch keine Gegenstände</div>
+          <div class="text-muted mb-3">Noch keine Gegenstaende</div>
         {% endif %}
 
         <form class="row g-2" method="post" action="{{ url_for('gegenstand_hinzufuegen', reise_id=reise_id) }}">
@@ -64,7 +64,7 @@
             <input class="form-control" id="menge_{{ loop.index0 }}" name="menge" type="number" min="1" value="1" />
           </div>
           <div class="col-auto align-self-end">
-            <button class="btn btn-outline-primary" type="submit">Hinzufügen</button>
+            <button class="btn btn-outline-primary" type="submit">Hinzufuegen</button>
           </div>
         </form>
       </div>
@@ -80,3 +80,4 @@
   </div>
   </div>
 {% endblock %}
+
