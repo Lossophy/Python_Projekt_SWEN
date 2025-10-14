@@ -11,17 +11,27 @@ Explain what the user has to type to get started with your solution. Which one
 is the main Python file? In the simplest case, this could look something like
 this:
 
-``
-    python main.py
-``
+```
+python main.py
+```
 
 In other cases the user might first have to install some project dependencies
 first has to run something like this (a sample requirements.txt file is also
 included in the project template):
 
-``
-    pip install -r requirements.txt
-``
+```
+pip install -r requirements.txt
+```
+
+### Webapp starten
+
+- Abhängigkeiten installieren: `pip install -r requirements.txt`
+- Entwicklung starten: `python main.py`
+- Browser öffnen: `http://127.0.0.1:5000`
+
+Hinweise:
+- Dieses Grundgerüst speichert Daten nur im Arbeitsspeicher. Für Persistenz kann später z. B. SQLite/SQLAlchemy ergänzt werden.
+- Die Domänenklassen liegen in `backend.py`.
 
 ## Anforderungen an die Webapplikation
 
