@@ -1,5 +1,5 @@
 from datetime import date
-from backend.modelle import Reise, Kategorie, Gegenstand
+from Backend.backend import Reise, Kategorie, Gegenstand
 
 
 def beispielreisen_laden() -> (
