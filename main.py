@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import List
+import json
+from pathlib import Path
+from typing import List, Optional
 
 from flask import (
     Flask,
@@ -42,6 +44,35 @@ def _db_close(exception=None):
 
 def _parse_date(value: str):
     return datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def _vorlagen_datei() -> Path:
+    return Path(__file__).with_name("vorlagen.json")
+
+
+def lade_vorlagen() -> List[dict]:
+    pfad = _vorlagen_datei()
+    if not pfad.exists():
+        return []
+    try:
+        data = json.loads(pfad.read_text(encoding="utf-8"))
+        vorlagen = data.get("vorlagen", [])
+        # normalize structure a bit
+        for v in vorlagen:
+            v.setdefault("id", "")
+            v.setdefault("name", "")
+            v.setdefault("kategorien", [])
+        return vorlagen
+    except Exception:
+        # On parse error, return no templates rather than crashing the form
+        return []
+
+
+def finde_vorlage(vorlagen: List[dict], vorlage_id: str) -> Optional[dict]:
+    for v in vorlagen:
+        if v.get("id") == vorlage_id:
+            return v
+    return None
 
 
 class BaseModel(Model):
@@ -100,7 +131,7 @@ def index():
 
 @app.get("/reise/neu")
 def reise_neu_form():
-    return render_template("reise_form.html")
+    return render_template("reise_form.html", vorlagen=lade_vorlagen(), form=None)
 
 
 @app.post("/reise/neu")
@@ -109,6 +140,7 @@ def reise_neu_submit():
     start = request.form.get("startdatum", "").strip()
     ende = request.form.get("enddatum", "").strip()
     beschreibung = request.form.get("beschreibung", "").strip()
+    vorlage_id = request.form.get("vorlage_id", "").strip()
 
     if not name or not start or not ende:
         return render_template(
@@ -119,7 +151,9 @@ def reise_neu_submit():
                 "startdatum": start,
                 "enddatum": ende,
                 "beschreibung": beschreibung,
+                "vorlage_id": vorlage_id,
             },
+            vorlagen=lade_vorlagen(),
         )
 
     r = ReiseModel.create(
@@ -128,6 +162,27 @@ def reise_neu_submit():
         enddatum=_parse_date(ende),
         beschreibung=beschreibung,
     )
+
+    # Falls Vorlage ausgewählt, Kategorien + Gegenstände anlegen
+    if vorlage_id:
+        vorlagen = lade_vorlagen()
+        vorlage = finde_vorlage(vorlagen, vorlage_id)
+        if vorlage:
+            for kat in vorlage.get("kategorien", []):
+                kat_name = str(kat.get("name", "")).strip()
+                if not kat_name:
+                    continue
+                kat_row = KategorieModel.create(name=kat_name, reise=r)
+                for g in kat.get("gegenstaende", []):
+                    g_name = str(g.get("name", "")).strip()
+                    if not g_name:
+                        continue
+                    menge = g.get("menge", 1)
+                    try:
+                        menge = max(1, int(menge))
+                    except Exception:
+                        menge = 1
+                    GegenstandModel.create(name=g_name, menge=menge, kategorie=kat_row)
     return redirect(url_for("reise_detail", reise_id=r.id))
 
 

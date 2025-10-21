@@ -1,0 +1,82 @@
+{
+  "vorlagen": [
+    {
+      "id": "staedtereise",
+      "name": "Städtereise",
+      "kategorien": [
+        {
+          "name": "Kleidung",
+          "gegenstaende": [
+            {"name": "Hose", "menge": 2},
+            {"name": "T-Shirt", "menge": 3},
+            {"name": "Leichte Jacke", "menge": 1},
+            {"name": "Unterwäsche", "menge": 5}
+          ]
+        },
+        {
+          "name": "Technik",
+          "gegenstaende": [
+            {"name": "Handyladegerät", "menge": 1},
+            {"name": "Kamera", "menge": 1}
+          ]
+        },
+        {
+          "name": "Accessoires",
+          "gegenstaende": [
+            {"name": "Sonnenbrille", "menge": 1}
+          ]
+        },
+        {
+          "name": "Sonstiges",
+          "gegenstaende": [
+            {"name": "Bahnticket", "menge": 1},
+            {"name": "Ausweis/Pass", "menge": 1},
+            {"name": "Verpflegung für unterwegs", "menge": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wanderurlaub",
+      "name": "Wanderurlaub",
+      "kategorien": [
+        {
+          "name": "Ausrüstung",
+          "gegenstaende": [
+            {"name": "Wanderschuhe", "menge": 1},
+            {"name": "Rucksack", "menge": 1},
+            {"name": "Schlafsack", "menge": 1},
+            {"name": "Erste-Hilfe-Set", "menge": 1},
+            {"name": "Blasenpflaster", "menge": 1}
+          ]
+        },
+        {
+          "name": "Accessoires",
+          "gegenstaende": [
+            {"name": "Sonnenbrille", "menge": 1},
+            {"name": "Sonnencreme", "menge": 1},
+            {"name": "Sonnenhut", "menge": 1}
+          ]
+        },
+        {
+          "name": "Kleidung",
+          "gegenstaende": [
+            {"name": "T-Shirt", "menge": 4},
+            {"name": "Wanderhose", "menge": 1},
+            {"name": "Unterwäsche", "menge": 4},
+            {"name": "Regenhose", "menge": 1},
+            {"name": "Regenjacke", "menge": 1}
+          ]
+        },
+        {
+          "name": "Technik",
+          "gegenstaende": [
+            {"name": "Kleines Solarpanel", "menge": 1},
+            {"name": "Ladekabel", "menge": 1}
+          ]
+        }
+      ]
+    }
+  ]
+}
+

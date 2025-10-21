@@ -15,6 +15,18 @@
     <label for="enddatum" class="form-label">Ende</label>
     <input type="date" class="form-control" id="enddatum" name="enddatum" value="{{ form.enddatum if form else '' }}" required />
   </div>
+  <div class="col-md-6">
+    <label for="vorlage_id" class="form-label">Vorlage (optional)</label>
+    <select class="form-select" id="vorlage_id" name="vorlage_id">
+      <option value="">Keine Vorlage</option>
+      {% if vorlagen %}
+        {% for v in vorlagen %}
+          <option value="{{ v.id }}" {% if form and form.vorlage_id == v.id %}selected{% endif %}>{{ v.name }}</option>
+        {% endfor %}
+      {% endif %}
+    </select>
+    <div class="form-text">Wählt eine Vorlage, um Kategorien und Gegenstände automatisch anzulegen.</div>
+  </div>
   <div class="col-12">
     <label for="beschreibung" class="form-label">Beschreibung</label>
     <textarea class="form-control" id="beschreibung" name="beschreibung" rows="3">{{ form.beschreibung if form else '' }}</textarea>
@@ -25,4 +37,3 @@
   </div>
   </form>
 {% endblock %}
-
