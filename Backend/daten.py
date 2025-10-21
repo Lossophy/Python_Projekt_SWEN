@@ -1,14 +1,17 @@
 from datetime import date
-from Backend.backend import Reise, Kategorie, Gegenstand
+from backend import Reise, Kategorie, Gegenstand, ReiseManager
 
 
-def beispielreisen_laden() -> (
-    list[Reise]
-):  # Erstellt eine Liste mit Beispielreisen, die beim App-Start angezeigt werden können
+def beispielreisen_erstellen() -> list[Reise]:
+    # Erstellt die initialen Beispielreisen und gibt sie als Liste zurück. Diese Funktion erzeugt keine Persistenz, sondern nur die Objekte.
+
     reisen = []
 
-    # Beispiel 1 – Städtereise
+    # -------------------------------
+    # Städtereise
+    # -------------------------------
     stadt = Reise("Städtereise", date(2026, 5, 10), date(2026, 5, 14), "Kurztrip")
+
     kleidung = Kategorie("Kleidung")
     kleidung.gegenstand_hinzufuegen(Gegenstand("Hose", 2))
     kleidung.gegenstand_hinzufuegen(Gegenstand("T-Shirt", 3))
@@ -34,13 +37,16 @@ def beispielreisen_laden() -> (
     stadt.kategorie_hinzufuegen(sonstiges)
     reisen.append(stadt)
 
-    # Beispiel 2 – Wanderurlaub
+    # -------------------------------
+    # Wanderferien Alpen
+    # -------------------------------
     wandern = Reise(
         "Wanderferien Alpen",
         date(2026, 8, 1),
         date(2026, 8, 10),
         "Outdoor-Abenteuer in der Schweiz",
     )
+
     ausruestung = Kategorie("Ausrüstung")
     ausruestung.gegenstand_hinzufuegen(Gegenstand("Wanderschuhe", 1))
     ausruestung.gegenstand_hinzufuegen(Gegenstand("Rucksack", 1))
@@ -71,3 +77,22 @@ def beispielreisen_laden() -> (
     reisen.append(wandern)
 
     return reisen
+
+
+def initiale_reisen_laden(manager: ReiseManager):
+
+    # Lädt die Beispielreisen in den Manager, falls noch keine Reisen vorhanden sind. Nur beim ersten Start werden die Reisen hinzugefügt.
+
+    if not manager.reisen:  # Nur erstellen, wenn noch keine Reisen existieren
+        beispielreisen = beispielreisen_erstellen()
+        for reise in beispielreisen:
+            manager.reise_hinzufuegen(reise)
+        manager.speichern()  # Persistiert nur, wenn die Reisen existieren
+        print("Beispielreisen wurden erstellt und gespeichert.")
+    else:
+        print("Reisen existieren bereits – keine Beispielreisen erstellt.")
+
+
+if __name__ == "__main__":
+    manager = ReiseManager("reisen.json")
+    initiale_reisen_laden(manager)

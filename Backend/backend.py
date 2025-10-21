@@ -66,3 +66,24 @@ class Reise:  # Repräsentiert eine Reise mit verschiedenen Kategorien und Gegen
 
     def __repr__(self):
         return f"Reise({self.name}, {len(self.kategorien)} Kategorien, {self.fortschritt_berechnen()}% gepackt)"
+
+
+class ReiseManager:
+    def __init__(self, dateipfad: str = "reisen.json"):
+        self.dateipfad = Path(dateipfad)
+        self.reisen: list[Reise] = []
+        self.laden()
+
+    # Laden und Speichern
+    def laden(self):
+        if not self.dateipfad.exists():
+            self.reisen = []
+            return
+        with open(self.dateipfad, "r", encoding="utf-8") as f:
+            daten = json.load(f)
+        self.reisen = [self._reise_aus_dict(r) for r in daten]
+
+    def speichern(self):
+        daten = [self._reise_zu_dict(r) for r in self.reisen]
+        with open(self.dateipfad, "w", encoding="utf-8") as f:
+            json.dump(daten, f, indent=4, ensure_ascii=False)
