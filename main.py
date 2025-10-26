@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 from pathlib import Path
 from typing import List, Optional
@@ -23,6 +23,15 @@ from peewee import (
     ForeignKeyField,
 )
 
+# === UI-Schalter ==============================================================
+# True  -> NiceGUI (Browser-UI auf Port 8080)
+# False -> klassische Flask-Templates (Port 5000)
+USE_NICEGUI = True
+
+# NiceGUI importieren (auch wenn USE_NICEGUI False ist, schadet nicht)
+from nicegui import ui
+
+# === Flask-App ================================================================
 
 app = Flask(__name__)
 
@@ -83,6 +92,7 @@ class BaseModel(Model):
 class ReiseModel(BaseModel):
     class Meta:
         table_name = "reisen"
+
     id = AutoField()
     name = CharField(max_length=200)
     startdatum = DateField()
@@ -102,6 +112,7 @@ class ReiseModel(BaseModel):
 class KategorieModel(BaseModel):
     class Meta:
         table_name = "kategorien"
+
     id = AutoField()
     name = CharField(max_length=200)
     reise = ForeignKeyField(ReiseModel, backref="kategorien", on_delete="CASCADE")
@@ -116,11 +127,17 @@ class KategorieModel(BaseModel):
 class GegenstandModel(BaseModel):
     class Meta:
         table_name = "gegenstaende"
+
     id = AutoField()
     name = CharField(max_length=200)
     menge = IntegerField(default=1)
     gepackt = BooleanField(default=False)
-    kategorie = ForeignKeyField(KategorieModel, backref="gegenstaende", on_delete="CASCADE")
+    kategorie = ForeignKeyField(
+        KategorieModel, backref="gegenstaende", on_delete="CASCADE"
+    )
+
+
+# === Flask-Routen (bestehend) ================================================
 
 
 @app.get("/")
@@ -244,11 +261,329 @@ def toggle_gepackt(reise_id: int, kat_index: int, item_index: int):
     return redirect(url_for("reise_detail", reise_id=reise_id))
 
 
+# === NiceGUI-UI (zusätzlich, optional via USE_NICEGUI) ========================
+def _ui_db_open():
+    if db.is_closed():
+        db.connect(reuse_if_open=True)
+
+
+def _ui_db_close():
+    if not db.is_closed():
+        db.close()
+
+
+def _reisen_laden():
+    return list(ReiseModel.select().order_by(ReiseModel.id))
+
+
+@ui.page("/")
+def ui_index():
+    _ui_db_open()
+
+    # -- Header ----------------------------------------------------------------
+    with ui.header().classes("items-center justify-between px-4"):
+        ui.label("🧳 PackAttack").classes("text-xl font-semibold")
+        with ui.row().classes("items-center gap-3"):
+            dark = ui.dark_mode()
+            ui.icon("light_mode").classes("opacity-70")
+            ui.switch().bind_value(dark, "value").props("dense")
+            ui.icon("dark_mode").classes("opacity-70")
+
+    ui.space()
+
+    # -- Dialog: Neue Reise -----------------------------------------------------
+    with ui.dialog() as dlg_new, ui.card().classes("w-[520px]"):
+        ui.label("Neue Reise anlegen").classes("text-lg font-semibold")
+        name = ui.input("Name").props("autofocus clearable").classes("w-full")
+        with ui.row().classes("w-full"):
+            start = ui.date(value=str(date.today())).classes("flex-1")
+            ende = ui.date(value=str(date.today())).classes("flex-1")
+        beschr = ui.textarea("Beschreibung").classes("w-full")
+
+        # Vorlagen-Auswahl (Namen anzeigen, ID intern auflösen)
+        vorlagen = lade_vorlagen()
+        name_to_id = {
+            v.get("name", f"Vorlage {i+1}"): v.get("id", "")
+            for i, v in enumerate(vorlagen)
+        }
+        select_vorlage = ui.select(
+            options=list(name_to_id.keys()), label="Vorlage (optional)"
+        ).props("clearable")
+
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Abbrechen", on_click=dlg_new.close).props("flat")
+
+            def create_reise():
+                try:
+                    r = ReiseModel.create(
+                        name=(name.value or "").strip(),
+                        startdatum=date.fromisoformat(start.value),
+                        enddatum=date.fromisoformat(ende.value),
+                        beschreibung=beschr.value or "",
+                    )
+                    # Falls Vorlage gewählt, Kategorien + Items anlegen
+                    chosen = select_vorlage.value
+                    if chosen:
+                        vorlage_id = name_to_id.get(chosen, "")
+                        v = finde_vorlage(vorlagen, vorlage_id)
+                        if v:
+                            for kat in v.get("kategorien", []):
+                                kname = str(kat.get("name", "")).strip()
+                                if not kname:
+                                    continue
+                                krow = KategorieModel.create(name=kname, reise=r)
+                                for g in kat.get("gegenstaende", []):
+                                    gname = str(g.get("name", "")).strip()
+                                    if not gname:
+                                        continue
+                                    try:
+                                        menge = max(1, int(g.get("menge", 1)))
+                                    except Exception:
+                                        menge = 1
+                                    GegenstandModel.create(
+                                        name=gname, menge=menge, kategorie=krow
+                                    )
+
+                    ui.notify(f"Reise „{r.name}“ erstellt", type="positive")
+                    dlg_new.close()
+                    refresh()
+                except Exception as e:
+                    ui.notify(f"Fehler: {e}", type="negative")
+
+            ui.button("Erstellen", on_click=create_reise).props("color=primary")
+
+    # -- Toolbar ----------------------------------------------------------------
+    with ui.row().classes("gap-3 items-center mb-2"):
+        ui.button("Neue Reise", on_click=dlg_new.open).props("color=primary")
+        ui.button("Neu laden", on_click=lambda: refresh()).props("outline")
+
+    ui.separator()
+
+    # -- Reisenliste ------------------------------------------------------------
+    container = ui.column().classes("w-full gap-3 mt-3 max-w-screen-md mx-auto")
+
+    # Bestätigungsdialog fürs Löschen
+    with ui.dialog() as dlg_confirm, ui.card():
+        confirm_msg = ui.label("Sicher löschen?")
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Abbrechen", on_click=dlg_confirm.close).props("flat")
+            btn_yes = ui.button("Löschen").props("color=negative")
+
+    def confirm_delete(fn, text="Sicher löschen?"):
+        confirm_msg.text = text
+
+        def set_yes():
+            dlg_confirm.close()
+            fn()
+
+        btn_yes.on("click", set_yes)
+        dlg_confirm.open()
+
+    def delete_reise_by_id(rid: int):
+        try:
+            ReiseModel.delete_by_id(rid)
+            ui.notify("Reise gelöscht", type="warning")
+            refresh()
+        except Exception as e:
+            ui.notify(f"Fehler: {e}", type="negative")
+
+    def card_for_reise(r: ReiseModel):
+        with ui.card().classes("w-full"):
+            with ui.row().classes("items-start justify-between w-full"):
+                with ui.column().classes("gap-1"):
+                    ui.link(r.name, f"/reise/{r.id}").classes("text-lg font-semibold")
+                    with ui.row().classes("items-center gap-2"):
+                        ui.icon("event").classes("opacity-70")
+                        ui.label(f"{r.startdatum} – {r.enddatum}")
+                    with ui.row().classes("items-center gap-2"):
+                        ui.icon("task_alt").classes("opacity-70")
+                        ui.label(f"Fortschritt: {r.fortschritt_berechnen()} %")
+                ui.button(
+                    icon="delete",
+                    on_click=lambda rid=r.id: confirm_delete(
+                        lambda: delete_reise_by_id(rid),
+                        text=f"Reise „{r.name}“ wirklich löschen?",
+                    ),
+                ).props("flat round")
+
+    def refresh():
+        container.clear()
+        for r in ReiseModel.select().order_by(ReiseModel.id):
+            card_for_reise(r)
+
+    refresh()
+    _ui_db_close()
+
+
+@ui.page("/reise/{reise_id}")
+def ui_reise_detail(reise_id: int):
+    _ui_db_open()
+    r = ReiseModel.get_or_none(ReiseModel.id == reise_id)
+    if not r:
+        ui.label("Reise nicht gefunden").classes("text-red-600")
+        _ui_db_close()
+        return
+
+    # Header
+    with ui.header().classes("items-center justify-between px-4"):
+        ui.link("← Zur Übersicht", "/").classes("text-primary")
+        ui.label(f"🔖 {r.name}").classes("text-lg font-semibold")
+
+    with ui.row().classes("items-center gap-3 mt-2"):
+        ui.icon("event").classes("opacity-70")
+        ui.label(f"{r.startdatum} – {r.enddatum}")
+
+    prog = (
+        ui.linear_progress(value=r.fortschritt_berechnen() / 100)
+        .props("color=green")
+        .classes("my-2")
+    )
+    ui.separator()
+
+    # Kategorie anlegen
+    with ui.expansion("Kategorie hinzufügen").classes("w-full max-w-screen-md mx-auto"):
+        kat_name = ui.input("Kategoriename").classes("w-full")
+
+        def add_kat():
+            if kat_name.value and kat_name.value.strip():
+                KategorieModel.create(name=kat_name.value.strip(), reise=r)
+                kat_name.value = ""
+                ui.notify("Kategorie erstellt", type="positive")
+                refresh()
+
+        ui.button("Hinzufügen", on_click=add_kat).props("color=primary")
+
+    container = ui.column().classes("w-full mt-2 max-w-screen-md mx-auto")
+
+    # Confirm-Dialog fürs Item-Löschen
+    with ui.dialog() as dlg_confirm, ui.card():
+        confirm_msg = ui.label("Sicher löschen?")
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Abbrechen", on_click=dlg_confirm.close).props("flat")
+            btn_yes = ui.button("Löschen").props("color=negative")
+
+    def confirm_delete(fn, text="Sicher löschen?"):
+        confirm_msg.text = text
+
+        def set_yes():
+            dlg_confirm.close()
+            fn()
+
+        btn_yes.on("click", set_yes)
+        dlg_confirm.open()
+
+    def update_menge(item_id: int, delta: int):
+        it = GegenstandModel.get_or_none(GegenstandModel.id == item_id)
+        if it:
+            it.menge = max(1, int(it.menge) + int(delta))
+            it.save()
+            refresh()
+
+    def toggle_item(item_id: int, cb):
+        it = GegenstandModel.get_or_none(GegenstandModel.id == item_id)
+        if it:
+            it.gepackt = bool(cb.value)
+            it.save()
+            refresh()
+
+    def delete_item(item_id: int):
+        GegenstandModel.delete_by_id(item_id)
+        refresh()
+
+    def add_item(kat: "KategorieModel", name: str, menge: int):
+        if name.strip():
+            GegenstandModel.create(
+                name=name.strip(), menge=max(1, int(menge)), kategorie=kat
+            )
+            ui.notify("Gegenstand hinzugefügt", type="positive")
+            refresh()
+
+    def kat_progress(kat: KategorieModel) -> float:
+        total = kat.anzahl_gesamt()
+        if total == 0:
+            return 0.0
+        return round(kat.anzahl_gepackt() / total, 2)
+
+    def refresh():
+        container.clear()
+        r_ref = ReiseModel.get_by_id(reise_id)
+        prog.value = r_ref.fortschritt_berechnen() / 100
+
+        for kat in r_ref.kategorien.order_by(KategorieModel.id):
+            with container:
+                with ui.card().classes("w-full"):
+                    with ui.row().classes("items-center justify-between"):
+                        ui.label(kat.name).classes("text-lg font-semibold")
+                        with ui.row().classes("items-center gap-2"):
+                            ui.icon("task_alt").classes("opacity-70")
+                            ui.label(f"{kat.anzahl_gepackt()}/{kat.anzahl_gesamt()}")
+                    ui.linear_progress(value=kat_progress(kat)).props(
+                        "color=primary"
+                    ).classes("my-1")
+
+                    # Items (Zeilen)
+                    for it in kat.gegenstaende.order_by(GegenstandModel.id):
+                        with ui.row().classes("items-center justify-between w-full"):
+                            with ui.row().classes("items-center gap-3"):
+                                ui.checkbox(
+                                    value=bool(it.gepackt),
+                                    on_change=lambda e, item_id=it.id: toggle_item(
+                                        item_id, e.sender
+                                    ),
+                                )
+                                ui.label(it.name).classes("min-w-[160px]")
+                                with ui.row().classes("items-center gap-1"):
+                                    ui.button(
+                                        icon="remove",
+                                        on_click=lambda iid=it.id: update_menge(
+                                            iid, -1
+                                        ),
+                                    ).props("flat round dense")
+                                    ui.label(f"× {int(it.menge)}").classes(
+                                        "w-10 text-center"
+                                    )
+                                    ui.button(
+                                        icon="add",
+                                        on_click=lambda iid=it.id: update_menge(
+                                            iid, +1
+                                        ),
+                                    ).props("flat round dense")
+
+                            ui.button(
+                                icon="delete",
+                                on_click=lambda iid=it.id: confirm_delete(
+                                    lambda: delete_item(iid),
+                                    text=f"„{it.name}“ löschen?",
+                                ),
+                            ).props("flat round dense")
+
+                    # Neues Item hinzufügen
+                    with ui.row().classes("mt-2 items-end"):
+                        new_name = ui.input("Neuer Gegenstand").classes("w-64")
+                        new_menge = ui.number(
+                            "Menge", value=1, min=1, format="%d"
+                        ).classes("w-32")
+                        ui.button(
+                            "Hinzufügen",
+                            on_click=lambda k=kat: add_item(
+                                k, new_name.value or "", int(new_menge.value or 1)
+                            ),
+                        ).props("color=primary")
+
+    refresh()
+    _ui_db_close()
+
+
+# === App-Start ================================================================
 with app.app_context():
     db.connect(reuse_if_open=True)
     db.create_tables([ReiseModel, KategorieModel, GegenstandModel])
     db.close()
 
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    if USE_NICEGUI:
+        # Optional: Flask unter /flask mounten, um alte Routen parallel zu sehen
+        # nicegui_app.mount('/flask', WSGIMiddleware(app))
+        ui.run(reload=False, title="PackAttack (NiceGUI)")  # -> http://127.0.0.1:8080/
+    else:
+        app.run(debug=True)  # -> http://127.0.0.1:5000/
