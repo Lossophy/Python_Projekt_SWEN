@@ -361,11 +361,11 @@ def ui_index():
 
     # -- Toolbar ----------------------------------------------------------------
     with ui.row().classes("gap-3 items-center mb-2"):
-        # Button 1: Neue Reise (Outline-Stil: Rand und Text in #1A6A7C)
+        # Button 1: Neue Reise (Outline-Stil: Rand und Text in #5898d4)
         ui.button("Neue Reise", on_click=dlg_new.open).props(
             "outlined color=primary"
         ).style("background-color: transparent;")
-        # Button 2: Neu laden (Outline-Stil: Rand und Text in #1A6A7C)
+        # Button 2: Neu laden (Outline-Stil: Rand und Text in #5898d4)
         ui.button("Neu laden", on_click=lambda: refresh()).props(
             "outlined color=primary"
         ).style("background-color: transparent;")
@@ -452,7 +452,9 @@ def ui_reise_detail(reise_id: int):
 
     with ui.row().classes("items-center gap-3 mt-2"):
         ui.icon("event").classes("opacity-70")
-        ui.label(f"{r.startdatum} – {r.enddatum}")
+        ui.label(
+            f"{r.startdatum.strftime('%d.%m.%Y')} – {r.enddatum.strftime('%d.%m.%Y')}"
+        )
 
     prog = (
         ui.linear_progress(value=r.fortschritt_berechnen() / 100)
