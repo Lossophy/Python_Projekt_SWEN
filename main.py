@@ -294,7 +294,12 @@ def ui_index():
     # -- Dialog: Neue Reise -----------------------------------------------------
     with ui.dialog() as dlg_new, ui.card().classes("w-[520px]"):
         ui.label("Neue Reise anlegen").classes("text-lg font-semibold")
-        name = ui.input("Name").props("autofocus clearable").classes("w-full")
+        name = (
+            ui.input("Name der Reise")
+            .props("autofocus clearable")
+            .classes("w-full")
+            .props("label-color=grey")
+        )
         with ui.row().classes("w-full"):
             start = ui.date(value=str(date.today())).classes("flex-1")
             ende = ui.date(value=str(date.today())).classes("flex-1")
@@ -311,7 +316,9 @@ def ui_index():
         ).props("clearable")
 
         with ui.row().classes("justify-end w-full mt-2"):
-            ui.button("Abbrechen", on_click=dlg_new.close).props("flat")
+            ui.button("Abbrechen", on_click=dlg_new.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
 
             def create_reise():
                 try:
@@ -350,12 +357,20 @@ def ui_index():
                 except Exception as e:
                     ui.notify(f"Fehler: {e}", type="negative")
 
-            ui.button("Erstellen", on_click=create_reise).props("color=primary")
+            ui.button("Erstellen", on_click=create_reise).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
 
     # -- Toolbar ----------------------------------------------------------------
     with ui.row().classes("gap-3 items-center mb-2"):
-        ui.button("Neue Reise", on_click=dlg_new.open).props("color=primary")
-        ui.button("Neu laden", on_click=lambda: refresh()).props("outline")
+        # Button 1: Neue Reise (Outline-Stil: Rand und Text in #1A6A7C)
+        ui.button("Neue Reise", on_click=dlg_new.open).props(
+            "outlined color=primary"
+        ).style("background-color: transparent;")
+        # Button 2: Neu laden (Outline-Stil: Rand und Text in #1A6A7C)
+        ui.button("Neu laden", on_click=lambda: refresh()).props(
+            "outlined color=primary"
+        ).style("background-color: transparent;")
 
     ui.separator()
 
@@ -366,7 +381,9 @@ def ui_index():
     with ui.dialog() as dlg_confirm, ui.card():
         confirm_msg = ui.label("Sicher löschen?")
         with ui.row().classes("justify-end w-full mt-2"):
-            ui.button("Abbrechen", on_click=dlg_confirm.close).props("flat")
+            ui.button("Abbrechen", on_click=dlg_confirm.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
             btn_yes = ui.button("Löschen").props("color=negative")
 
     def confirm_delete(fn, text="Sicher löschen?"):
@@ -391,7 +408,9 @@ def ui_index():
         with ui.card().classes("w-full"):
             with ui.row().classes("items-start justify-between w-full"):
                 with ui.column().classes("gap-1"):
-                    ui.link(r.name, f"/reise/{r.id}").classes("text-lg font-semibold")
+                    ui.link(r.name, f"/reise/{r.id}").classes(
+                        "text-lg font-semibold text-primary"
+                    ).style("text-decoration: none;")
                     with ui.row().classes("items-center gap-2"):
                         ui.icon("event").classes("opacity-70")
                         ui.label(f"{r.startdatum} – {r.enddatum}")
@@ -425,7 +444,9 @@ def ui_reise_detail(reise_id: int):
         return
 
     # Header
-    with ui.header().classes("items-center justify-between px-4"):
+    with ui.header(dark=True).classes("items-center justify-between px-4").style(
+        "background-color: #1A6A7C"
+    ):
         ui.link("← Zur Übersicht", "/").classes("text-primary")
         ui.label(f"🔖 {r.name}").classes("text-lg font-semibold")
 
@@ -451,7 +472,9 @@ def ui_reise_detail(reise_id: int):
                 ui.notify("Kategorie erstellt", type="positive")
                 refresh()
 
-        ui.button("Hinzufügen", on_click=add_kat).props("color=primary")
+        ui.button("Hinzufügen", on_click=add_kat).props("outlined color=primary").style(
+            "background-color: transparent;"
+        )
 
     container = ui.column().classes("w-full mt-2 max-w-screen-md mx-auto")
 
@@ -459,7 +482,9 @@ def ui_reise_detail(reise_id: int):
     with ui.dialog() as dlg_confirm, ui.card():
         confirm_msg = ui.label("Sicher löschen?")
         with ui.row().classes("justify-end w-full mt-2"):
-            ui.button("Abbrechen", on_click=dlg_confirm.close).props("flat")
+            ui.button("Abbrechen", on_click=dlg_confirm.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
             btn_yes = ui.button("Löschen").props("color=negative")
 
     def confirm_delete(fn, text="Sicher löschen?"):
@@ -518,7 +543,9 @@ def ui_reise_detail(reise_id: int):
                             ui.icon("task_alt").classes("opacity-70")
                             ui.label(f"{kat.anzahl_gepackt()}/{kat.anzahl_gesamt()}")
                     ui.linear_progress(value=kat_progress(kat)).props(
-                        "color=primary"
+                        ("outlined").style(
+                            f"background-color: transparent; border-color: #1A6A7C; color: #1A6A7C;"
+                        )
                     ).classes("my-1")
 
                     # Items (Zeilen)
@@ -568,7 +595,9 @@ def ui_reise_detail(reise_id: int):
                             on_click=lambda k=kat: add_item(
                                 k, new_name.value or "", int(new_menge.value or 1)
                             ),
-                        ).props("color=primary")
+                        ).props("outlined color=primary").style(
+                            "background-color: transparent;"
+                        )
 
     refresh()
     _ui_db_close()
@@ -580,10 +609,22 @@ with app.app_context():
     db.create_tables([ReiseModel, KategorieModel, GegenstandModel])
     db.close()
 
-if __name__ == "__main__":
+if __name__ in {"__main__", "__mp_main__"}:
     if USE_NICEGUI:
         # Optional: Flask unter /flask mounten, um alte Routen parallel zu sehen
         # nicegui_app.mount('/flask', WSGIMiddleware(app))
-        ui.run(reload=False, title="PackAttack (NiceGUI)")  # -> http://127.0.0.1:8080/
+        ui.run(
+            reload=True,
+            title="PackAttack (NiceGUI)",
+            tailwind={
+                "theme": {
+                    "extend": {
+                        "colors": {
+                            "primary": "#5898d4",
+                        }
+                    }
+                }
+            },
+        )  # -> http://127.0.0.1:8080/
     else:
         app.run(debug=True)  # -> http://127.0.0.1:5000/
