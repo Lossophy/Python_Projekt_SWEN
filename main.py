@@ -444,10 +444,10 @@ def ui_reise_detail(reise_id: int):
         return
 
     # Header
-    with ui.header(dark=True).classes("items-center justify-between px-4").style(
-        "background-color: #1A6A7C"
+    with ui.header().classes("items-center justify-between px-4 text-white").style(
+        "background-color: primary;"
     ):
-        ui.link("← Zur Übersicht", "/").classes("text-primary")
+        ui.link("← Zur Übersicht", "/").classes("text-white")
         ui.label(f"🔖 {r.name}").classes("text-lg font-semibold")
 
     with ui.row().classes("items-center gap-3 mt-2"):
@@ -542,10 +542,8 @@ def ui_reise_detail(reise_id: int):
                         with ui.row().classes("items-center gap-2"):
                             ui.icon("task_alt").classes("opacity-70")
                             ui.label(f"{kat.anzahl_gepackt()}/{kat.anzahl_gesamt()}")
-                    ui.linear_progress(value=kat_progress(kat)).props(
-                        ("outlined").style(
-                            f"background-color: transparent; border-color: #1A6A7C; color: #1A6A7C;"
-                        )
+                    ui.linear_progress(value=kat_progress(kat)).props("outlined").style(
+                        f"background-color: transparent; border-color: #5898d4; color: #5898d4;"
                     ).classes("my-1")
 
                     # Items (Zeilen)
