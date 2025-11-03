@@ -283,9 +283,9 @@ def ui_index():
         ui.label("🧳 PackAttack").classes("text-xl font-semibold")
         with ui.row().classes("items-center gap-3"):
             dark = ui.dark_mode()
-            ui.icon("light_mode").classes("opacity-70")
-            ui.switch().bind_value(dark, "value").props("dense")
-            ui.icon("dark_mode").classes("opacity-70")
+            ui.icon("light_mode").classes("text-white")
+            ui.switch().bind_value(dark, "value").props("dense color=white")
+            ui.icon("dark_mode").classes("text-white")
 
     ui.space()
 
