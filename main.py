@@ -11,6 +11,7 @@ from flask import (
     url_for,
     abort,
 )
+from nicegui import ui
 from peewee import (
     Model,
     SqliteDatabase,
@@ -27,9 +28,6 @@ from peewee import (
 # True  -> NiceGUI (Browser-UI auf Port 8080)
 # False -> klassische Flask-Templates (Port 5000)
 USE_NICEGUI = True
-
-# NiceGUI importieren (auch wenn USE_NICEGUI False ist, schadet nicht)
-from nicegui import ui
 
 # === Flask-App ================================================================
 
@@ -413,7 +411,9 @@ def ui_index():
                     ).style("text-decoration: none;")
                     with ui.row().classes("items-center gap-2"):
                         ui.icon("event").classes("opacity-70")
-                        ui.label(f"{r.startdatum} – {r.enddatum}")
+                        ui.label(
+                            f"{r.startdatum.strftime('%d.%m.%Y')} – {r.enddatum.strftime('%d.%m.%Y')}"
+                        )
                     with ui.row().classes("items-center gap-2"):
                         ui.icon("task_alt").classes("opacity-70")
                         ui.label(f"Fortschritt: {r.fortschritt_berechnen()} %")
