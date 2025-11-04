@@ -11,7 +11,10 @@ from flask import (
     url_for,
     abort,
 )
-from nicegui import ui
+from nicegui import ui, app as ng_app
+import os
+
+
 from peewee import (
     Model,
     SqliteDatabase,
@@ -283,6 +286,7 @@ def ui_index():
         ui.label("🧳 PackAttack").classes("text-xl font-semibold")
         with ui.row().classes("items-center gap-3"):
             dark = ui.dark_mode()
+            dark.bind_value(ng_app.storage.user, "dark_mode_enabled")
             ui.icon("light_mode").classes("text-white")
             ui.switch().bind_value(dark, "value").props("dense color=white")
             ui.icon("dark_mode").classes("text-white")
@@ -416,6 +420,9 @@ def ui_index():
                         )
                     with ui.row().classes("items-center gap-2"):
                         ui.icon("task_alt").classes("opacity-70")
+                        ui.linear_progress(value=r.fortschritt_berechnen() / 100).props(
+                            "color=green"
+                        ).classes("my-1 w-full")
                         ui.label(f"Fortschritt: {r.fortschritt_berechnen()} %")
                 ui.button(
                     icon="delete",
@@ -442,6 +449,10 @@ def ui_reise_detail(reise_id: int):
         ui.label("Reise nicht gefunden").classes("text-red-600")
         _ui_db_close()
         return
+
+    # Dark-Mode auch hier aus dem persistenten Speicher holen
+    dark = ui.dark_mode()
+    dark.bind_value(ng_app.storage.user, "dark_mode_enabled")
 
     # Header
     with ui.header().classes("items-center justify-between px-4 text-white").style(
@@ -616,6 +627,9 @@ if __name__ in {"__main__", "__mp_main__"}:
         ui.run(
             reload=True,
             title="PackAttack (NiceGUI)",
+            storage_secret=os.getenv(
+                "NICEGUI_STORAGE_SECRET", "change-me-please-31+chars"
+            ),
             tailwind={
                 "theme": {
                     "extend": {
