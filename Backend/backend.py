@@ -1,5 +1,7 @@
 from datetime import date
 from typing import List
+import json
+from pathlib import Path
 
 
 class Gegenstand:  # Repräsentiert einen einzelnen Gegenstand, der eingepackt werden soll.
@@ -87,3 +89,44 @@ class ReiseManager:
         daten = [self._reise_zu_dict(r) for r in self.reisen]
         with open(self.dateipfad, "w", encoding="utf-8") as f:
             json.dump(daten, f, indent=4, ensure_ascii=False)
+
+    def _reise_zu_dict(self, reise: Reise) -> dict:
+        pass
+        """Wandelt ein Reise-Objekt in ein serialisierbares Dictionary um."""
+        return {
+            "name": reise.name,
+            "startdatum": reise.startdatum.isoformat(),
+            "enddatum": reise.enddatum.isoformat(),
+            "beschreibung": reise.beschreibung,
+            "kategorien": [
+                {
+                    "name": kat.name,
+                    "gegenstaende": [
+                        {
+                            "name": g.name,
+                            "menge": g.menge,
+                            "gepackt": g.gepackt,
+                        }
+                        for g in kat.gegenstaende
+                    ],
+                }
+                for kat in reise.kategorien
+            ],
+        }
+
+    def _reise_aus_dict(self, daten: dict) -> Reise:
+        pass
+        """Erstellt aus einem Dictionary wieder ein Reise-Objekt."""
+        reise = Reise(
+            name=daten["name"],
+            startdatum=date.fromisoformat(daten["startdatum"]),
+            enddatum=date.fromisoformat(daten["enddatum"]),
+            beschreibung=daten.get("beschreibung", ""),
+        )
+        for kat_daten in daten.get("kategorien", []):
+            kategorie = Kategorie(name=kat_daten["name"])
+            for g_daten in kat_daten.get("gegenstaende", []):
+                gegenstand = Gegenstand(**g_daten)  # Erstellt Gegenstand aus dict
+                kategorie.gegenstand_hinzufuegen(gegenstand)
+            reise.kategorie_hinzufuegen(kategorie)
+        return reise
