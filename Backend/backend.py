@@ -1,5 +1,7 @@
 from datetime import date
 from typing import List
+import json
+from pathlib import Path
 
 
 class Gegenstand:  # Repräsentiert einen einzelnen Gegenstand, der eingepackt werden soll.
@@ -87,3 +89,9 @@ class ReiseManager:
         daten = [self._reise_zu_dict(r) for r in self.reisen]
         with open(self.dateipfad, "w", encoding="utf-8") as f:
             json.dump(daten, f, indent=4, ensure_ascii=False)
+
+    def _reise_zu_dict(self, reise: Reise) -> dict:
+        pass
+
+    def _reise_aus_dict(self, daten: dict) -> Reise:
+        pass
