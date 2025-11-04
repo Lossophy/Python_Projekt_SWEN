@@ -1,42 +1,22 @@
-# VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-
-# Vim editor
-*.sw[op]
-
-# Other Python files and directories
-*.py[cod]
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
 
-# Distribution building
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
 eggs/
-sdist/
-wheels/
-*.egg-info/
-*.egg
-*.bundle
+.eggs/
+lib/
+lib64/
 
-# Venv files and directories
-## in case of an environment in root directory
-pyvenv.cfg
-Include/
-Lib/
-Scripts/
-## in case of environment in subdirectories
-.env
-.venv
-env/
-venv/
-
-# MS Office temporary documents
-~$*
-
-# MacOS files
-.DS_Store
+# SQLite databases
+*.db
+*.sqlite3

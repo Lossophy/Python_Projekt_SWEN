@@ -91,7 +91,6 @@ class ReiseManager:
             json.dump(daten, f, indent=4, ensure_ascii=False)
 
     def _reise_zu_dict(self, reise: Reise) -> dict:
-        pass
         """Wandelt ein Reise-Objekt in ein serialisierbares Dictionary um."""
         return {
             "name": reise.name,
@@ -115,7 +114,6 @@ class ReiseManager:
         }
 
     def _reise_aus_dict(self, daten: dict) -> Reise:
-        pass
         """Erstellt aus einem Dictionary wieder ein Reise-Objekt."""
         reise = Reise(
             name=daten["name"],
