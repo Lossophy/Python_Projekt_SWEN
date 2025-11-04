@@ -228,21 +228,25 @@ def gegenstand_hinzufuegen(reise_id: int):
     r = ReiseModel.get_or_none(ReiseModel.id == reise_id)
     if not r:
         abort(404)
-    name = request.form.get("gegenstand_name", "").strip()
-    menge_raw = request.form.get("menge", "1").strip()
-    kat_index_raw = request.form.get("kategorie_index", "").strip()
+    kat_id_raw = request.form.get("kategorie_id", "").strip()
+    try:
+        kat_id = int(kat_id_raw)
+    except ValueError:
+        kat_id = -1
+
+    name = request.form.get(f"gegenstand_name_{kat_id}", "").strip()
+    menge_raw = request.form.get(f"menge_{kat_id}", "1").strip()
     try:
         menge = max(1, int(menge_raw))
     except ValueError:
         menge = 1
-    try:
-        kat_index = int(kat_index_raw)
-    except ValueError:
-        kat_index = -1
-    kategorien = list(r.kategorien.order_by(KategorieModel.id))
-    if name and 0 <= kat_index < len(kategorien):
-        kat = kategorien[kat_index]
-        GegenstandModel.create(name=name, menge=menge, kategorie=kat)
+
+    if name and kat_id > 0:
+        kat = KategorieModel.get_or_none(
+            KategorieModel.id == kat_id, KategorieModel.reise == r
+        )
+        if kat:
+            GegenstandModel.create(name=name, menge=menge, kategorie=kat)
     return redirect(url_for("reise_detail", reise_id=reise_id))
 
 

@@ -7,18 +7,20 @@
     <small class="text-muted">{{ reise.startdatum }} - {{ reise.enddatum }}</small>
   </div>
   <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Zurueck</a>
-  </div>
+</div>
 
 {% if reise.beschreibung %}
-  <p>{{ reise.beschreibung }}</p>
+<p>{{ reise.beschreibung }}</p>
 {% endif %}
 
 <div class="mb-4">
   <h2 class="h5">Kategorien</h2>
-  <form method="post" action="{{ url_for('kategorie_hinzufuegen', reise_id=reise_id) }}" class="row g-2 align-items-end">
+  <form method="post" action="{{ url_for('kategorie_hinzufuegen', reise_id=reise_id) }}"
+    class="row g-2 align-items-end">
     <div class="col-md-6">
       <label for="kategorie_name" class="form-label">Neue Kategorie</label>
-      <input type="text" class="form-control" id="kategorie_name" name="kategorie_name" placeholder="z. B. Kleidung, Technik" />
+      <input type="text" class="form-control" id="kategorie_name" name="kategorie_name"
+        placeholder="z. B. Kleidung, Technik" />
     </div>
     <div class="col-auto">
       <button class="btn btn-primary" type="submit">Hinzufuegen</button>
@@ -27,57 +29,75 @@
 </div>
 
 {% if reise.kategorien %}
-  {% for kat in reise.kategorien %}
-    {% set kat_index = loop.index0 %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h3 class="h6 mb-0">{{ kat.name }}</h3>
-          <small class="text-muted">{{ kat.anzahl_gepackt() }}/{{ kat.anzahl_gesamt() }} gepackt</small>
-        </div>
-
-        {% if kat.gegenstaende %}
-          <ul class="list-group mb-3">
-            {% for g in kat.gegenstaende %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <form method="post" action="{{ url_for('toggle_gepackt', reise_id=reise_id, kat_index=kat_index, item_index=loop.index0) }}" class="d-inline">
-                    <button class="btn btn-sm {{ 'btn-success' if g.gepackt else 'btn-outline-secondary' }}" type="submit" title="Gepackt umschalten">{{ '&#10003;'|safe if g.gepackt else '&#9675;'|safe }}</button>
-                  </form>
-                  <span class="ms-2">{{ g.name }}</span>
-                </div>
-                <span class="badge text-bg-secondary">x{{ g.menge }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div class="text-muted mb-3">Noch keine Gegenstaende</div>
-        {% endif %}
-
-        <form class="row g-2" method="post" action="{{ url_for('gegenstand_hinzufuegen', reise_id=reise_id) }}">
-          <input type="hidden" name="kategorie_index" value="{{ loop.index0 }}" />
-          <div class="col-md-6">
-            <label class="form-label" for="gegenstand_name_{{ loop.index0 }}">Gegenstand</label>
-            <input class="form-control" id="gegenstand_name_{{ loop.index0 }}" name="gegenstand_name" placeholder="z. B. T-Shirt" />
-          </div>
-          <div class="col-md-2">
-            <label class="form-label" for="menge_{{ loop.index0 }}">Menge</label>
-            <input class="form-control" id="menge_{{ loop.index0 }}" name="menge" type="number" min="1" value="1" />
-          </div>
-          <div class="col-auto align-self-end">
-            <button class="btn btn-outline-primary" type="submit">Hinzufuegen</button>
-          </div>
-        </form>
-      </div>
+{% for kat in reise.kategorien %}
+{% set kat_index = loop.index0 %}
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h3 class="h6 mb-0">{{ kat.name }}</h3>
+      <small class="text-muted">{{ kat.anzahl_gepackt() }}/{{ kat.anzahl_gesamt() }} gepackt</small>
     </div>
-  {% endfor %}
+
+    {% if kat.gegenstaende %}
+    <ul class="list-group mb-3">
+      {% for g in kat.gegenstaende %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <form method="post"
+            action="{{ url_for('toggle_gepackt', reise_id=reise_id, kat_index=kat_index, item_index=loop.index0) }}"
+            class="d-inline">
+            <button class="btn btn-sm {{ 'btn-success' if g.gepackt else 'btn-outline-secondary' }}" type="submit"
+              title="Gepackt umschalten">{{ '&#10003;'|safe if g.gepackt else '&#9675;'|safe }}</button>
+          </form>
+          <span class="ms-2">{{ g.name }}</span>
+        </div>
+        <span class="badge text-bg-secondary">x{{ g.menge }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="text-muted mb-3">Noch keine Gegenstaende</div>
+    {% endif %}
+
+    <form class="row g-2" method="post" action="{{ url_for('gegenstand_hinzufuegen', reise_id=reise_id) }}"
+      id="form-gegenstand-{{ kat.id }}">
+      <input type="hidden" name="kategorie_id" value="{{ kat.id }}" />
+      <div class="col-md-6">
+        <label class="form-label" for="gegenstand_name_{{ loop.index0 }}">Gegenstand</label>
+        <input class="form-control" id="gegenstand_name_{{ loop.index0 }}" name="gegenstand_name_{{ kat.id }}"
+          placeholder="z. B. T-Shirt" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="menge_{{ loop.index0 }}">Menge</label>
+        <input class="form-control" id="menge_{{ loop.index0 }}" name="menge_{{ kat.id }}" type="number" min="1"
+          value="1" />
+      </div>
+      <div class="col-auto align-self-end">
+        <button class="btn btn-outline-primary" type="button"
+          onclick="submitForm('form-gegenstand-{{ kat.id }}')">Hinzufuegen</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
-  <div class="alert alert-secondary">Noch keine Kategorien. Lege oben eine an.</div>
+<div class="alert alert-secondary">Noch keine Kategorien. Lege oben eine an.</div>
 {% endif %}
 
 <div class="mt-4">
-  <div class="progress" role="progressbar" aria-valuenow="{{ reise.fortschritt_berechnen() }}" aria-valuemin="0" aria-valuemax="100">
-    <div class="progress-bar" style="width: {{ reise.fortschritt_berechnen() }}%">{{ reise.fortschritt_berechnen() }}%</div>
+  <div class="progress" role="progressbar" aria-valuenow="{{ reise.fortschritt_berechnen() }}" aria-valuemin="0"
+    aria-valuemax="100">
+    <div class="progress-bar" style="width: {{ reise.fortschritt_berechnen() }}%">{{ reise.fortschritt_berechnen() }}%
+    </div>
   </div>
-  </div>
+</div>
+
+<script>
+  function submitForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+      form.submit();
+    }
+  }
+</script>
 {% endblock %}
