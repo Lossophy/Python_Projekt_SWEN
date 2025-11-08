@@ -1,105 +1,85 @@
 {
   "vorlagen": [
     {
-      "id": "staedtereise",
-      "name": "Städtereise",
+      "id": "strandurlaub-v1",
+      "name": "Strandurlaub",
       "kategorien": [
+        {
+          "name": "Dokumente",
+          "gegenstaende": [
+            {
+              "name": "Ausweis/Reisepass",
+              "menge": 1
+            },
+            {
+              "name": "Tickets/Reservierungen",
+              "menge": 1
+            },
+            {
+              "name": "Versicherung (Karte/Police)",
+              "menge": 1
+            },
+            {
+              "name": "Zahlungsmittel (Karte/Bargeld)",
+              "menge": 1
+            }
+          ]
+        },
         {
           "name": "Kleidung",
           "gegenstaende": [
             {
-              "name": "Hose",
+              "name": "T-Shirts",
+              "menge_pro_tag": 0.5
+            },
+            {
+              "name": "Unterhosen",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Socken",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Badehose/Bikini",
               "menge": 2
             },
             {
-              "name": "T-Shirt",
-              "menge": 3
-            },
-            {
-              "name": "Leichte Jacke",
+              "name": "Leichtes Strand-Outfit",
               "menge": 1
             },
             {
-              "name": "Unterwäsche",
-              "menge_pro_tag": 1
-            }
-          ]
-        },
-        {
-          "name": "Technik",
-          "gegenstaende": [
-            {
-              "name": "Handyladegerät",
-              "menge": 1
-            },
-            {
-              "name": "Kamera",
+              "name": "Flip-Flops",
               "menge": 1
             }
           ]
         },
         {
-          "name": "Accessoires",
+          "name": "Aktivitätenspezifisch",
           "gegenstaende": [
             {
               "name": "Sonnenbrille",
               "menge": 1
-            }
-          ]
-        },
-        {
-          "name": "Sonstiges",
-          "gegenstaende": [
+            },
             {
-              "name": "Bahnticket",
+              "name": "Sonnenhut/Kappe",
               "menge": 1
             },
             {
-              "name": "Ausweis/Pass",
+              "name": "Strandtuch",
               "menge": 1
             },
             {
-              "name": "Verpflegung für unterwegs",
-              "menge": 1
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "wanderurlaub",
-      "name": "Wanderurlaub",
-      "kategorien": [
-        {
-          "name": "Ausrüstung",
-          "gegenstaende": [
-            {
-              "name": "Wanderschuhe",
-              "menge": 1
-            },
-            {
-              "name": "Rucksack",
-              "menge": 1
-            },
-            {
-              "name": "Schlafsack",
-              "menge": 1
-            },
-            {
-              "name": "Erste-Hilfe-Set",
-              "menge": 1
-            },
-            {
-              "name": "Blasenpflaster",
+              "name": "Strandtasche",
               "menge": 1
             }
           ]
         },
         {
-          "name": "Accessoires",
+          "name": "Hygiene & Gesundheit",
           "gegenstaende": [
             {
-              "name": "Sonnenbrille",
+              "name": "Zahnbürste & Zahnpasta",
               "menge": 1
             },
             {
@@ -107,7 +87,72 @@
               "menge": 1
             },
             {
-              "name": "Sonnenhut",
+              "name": "After-Sun",
+              "menge": 1
+            },
+            {
+              "name": "Persönliche Medikamente",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Tagesausrüstung",
+          "gegenstaende": [
+            {
+              "name": "Wasserflasche",
+              "menge": 1
+            },
+            {
+              "name": "Lesestoff/E-Book",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Elektronik",
+          "gegenstaende": [
+            {
+              "name": "Smartphone + Ladegerät",
+              "menge": 1
+            },
+            {
+              "name": "Powerbank",
+              "menge": 1
+            },
+            {
+              "name": "Steckdosenadapter (Land)",
+              "menge": 1
+            },
+            {
+              "name": "Kopfhörer",
+              "menge": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "staedtetrip-v1",
+      "name": "Städtetrip",
+      "kategorien": [
+        {
+          "name": "Dokumente",
+          "gegenstaende": [
+            {
+              "name": "Ausweis/ID",
+              "menge": 1
+            },
+            {
+              "name": "Tickets/Reservierungen/ÖPNV-Pässe",
+              "menge": 1
+            },
+            {
+              "name": "Versicherung (Karte/Police)",
+              "menge": 1
+            },
+            {
+              "name": "Zahlungsmittel (Karte/Bargeld)",
               "menge": 1
             }
           ]
@@ -116,19 +161,143 @@
           "name": "Kleidung",
           "gegenstaende": [
             {
-              "name": "T-Shirt",
+              "name": "T-Shirts/Hemden",
               "menge_pro_tag": 0.5
+            },
+            {
+              "name": "Unterhosen",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Socken",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Bequeme Schuhe/Sneaker",
+              "menge": 1
+            },
+            {
+              "name": "Jacke/Pullover",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Aktivitätenspezifisch",
+          "gegenstaende": [
+            {
+              "name": "Stadtplan/Offline-Maps (Papier)",
+              "menge": 1
+            },
+            {
+              "name": "Sonnenbrille",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Hygiene & Gesundheit",
+          "gegenstaende": [
+            {
+              "name": "Zahnbürste & Zahnpasta",
+              "menge": 1
+            },
+            {
+              "name": "Deo",
+              "menge": 1
+            },
+            {
+              "name": "Reisegrößen Shampoo/Duschgel",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Tagesausrüstung",
+          "gegenstaende": [
+            {
+              "name": "Tagesrucksack",
+              "menge": 1
+            },
+            {
+              "name": "Wasserflasche",
+              "menge": 1
+            },
+            {
+              "name": "Kleiner Regenschirm",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Elektronik",
+          "gegenstaende": [
+            {
+              "name": "Smartphone + Ladegerät",
+              "menge": 1
+            },
+            {
+              "name": "Powerbank",
+              "menge": 1
+            },
+            {
+              "name": "Steckdosenadapter (Land)",
+              "menge": 1
+            },
+            {
+              "name": "Kopfhörer",
+              "menge": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wanderurlaub-v1",
+      "name": "Wanderurlaub",
+      "kategorien": [
+        {
+          "name": "Dokumente",
+          "gegenstaende": [
+            {
+              "name": "Ausweis/Reisepass",
+              "menge": 1
+            },
+            {
+              "name": "Tickets/Reservierungen",
+              "menge": 1
+            },
+            {
+              "name": "Versicherung (Karte/Police)",
+              "menge": 1
+            },
+            {
+              "name": "Zahlungsmittel (Karte/Bargeld)",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Kleidung",
+          "gegenstaende": [
+            {
+              "name": "Funktionsshirts",
+              "menge_pro_tag": 0.5
+            },
+            {
+              "name": "Unterhosen",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Wandersocken",
+              "menge_pro_tag": 1
             },
             {
               "name": "Wanderhose",
               "menge": 1
             },
             {
-              "name": "Unterwäsche",
-              "menge": 4
-            },
-            {
-              "name": "Regenhose",
+              "name": "Fleece/Isolationsschicht",
               "menge": 1
             },
             {
@@ -138,14 +307,233 @@
           ]
         },
         {
-          "name": "Technik",
+          "name": "Aktivitätenspezifisch",
           "gegenstaende": [
             {
-              "name": "Kleines Solarpanel",
+              "name": "Wanderschuhe (eingelaufen)",
               "menge": 1
             },
             {
-              "name": "Ladekabel",
+              "name": "Rucksack (20–30 L)",
+              "menge": 1
+            },
+            {
+              "name": "Wanderstöcke",
+              "menge": 1
+            },
+            {
+              "name": "Regenhülle Rucksack",
+              "menge": 1
+            },
+            {
+              "name": "Karte/GPS/Offline-Maps (Papier)",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Hygiene & Gesundheit",
+          "gegenstaende": [
+            {
+              "name": "Zahnbürste & Zahnpasta",
+              "menge": 1
+            },
+            {
+              "name": "Sonnencreme",
+              "menge": 1
+            },
+            {
+              "name": "Erste-Hilfe-Set",
+              "menge": 1
+            },
+            {
+              "name": "Blasenpflaster/Tape",
+              "menge": 1
+            },
+            {
+              "name": "Persönliche Medikamente",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Tagesausrüstung",
+          "gegenstaende": [
+            {
+              "name": "Wasserflasche/Hydration",
+              "menge": 1
+            },
+            {
+              "name": "Snacks/Energieriegel",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Sonnenbrille",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Elektronik",
+          "gegenstaende": [
+            {
+              "name": "Smartphone + Ladegerät",
+              "menge": 1
+            },
+            {
+              "name": "Powerbank",
+              "menge": 1
+            },
+            {
+              "name": "Steckdosenadapter (Land)",
+              "menge": 1
+            },
+            {
+              "name": "Kopfhörer",
+              "menge": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skiurlaub-v1",
+      "name": "Skiurlaub",
+      "kategorien": [
+        {
+          "name": "Dokumente",
+          "gegenstaende": [
+            {
+              "name": "Ausweis/Reisepass",
+              "menge": 1
+            },
+            {
+              "name": "Tickets/Reservierungen/Skipass",
+              "menge": 1
+            },
+            {
+              "name": "Versicherung (Karte/Police)",
+              "menge": 1
+            },
+            {
+              "name": "Zahlungsmittel (Karte/Bargeld)",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Kleidung",
+          "gegenstaende": [
+            {
+              "name": "Unterhosen",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Skisocken",
+              "menge_pro_tag": 1
+            },
+            {
+              "name": "Funktionsunterwäsche (Set)",
+              "menge": 2
+            },
+            {
+              "name": "Thermoschicht (Fleece)",
+              "menge": 1
+            },
+            {
+              "name": "Ski-/Snowboardjacke",
+              "menge": 1
+            },
+            {
+              "name": "Ski-/Snowboardhose",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Aktivitätenspezifisch",
+          "gegenstaende": [
+            {
+              "name": "Ski/Snowboard",
+              "menge": 1
+            },
+            {
+              "name": "Skischuhe/Boots",
+              "menge": 1
+            },
+            {
+              "name": "Stöcke (bei Ski)",
+              "menge": 1
+            },
+            {
+              "name": "Helm",
+              "menge": 1
+            },
+            {
+              "name": "Skibrille",
+              "menge": 1
+            },
+            {
+              "name": "Handschuhe",
+              "menge": 1
+            },
+            {
+              "name": "Neckwarmer/Mütze",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Hygiene & Gesundheit",
+          "gegenstaende": [
+            {
+              "name": "Zahnbürste & Zahnpasta",
+              "menge": 1
+            },
+            {
+              "name": "Sonnencreme",
+              "menge": 1
+            },
+            {
+              "name": "Lippenpflege",
+              "menge": 1
+            },
+            {
+              "name": "Persönliche Medikamente",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Tagesausrüstung",
+          "gegenstaende": [
+            {
+              "name": "Tagesrucksack",
+              "menge": 1
+            },
+            {
+              "name": "Thermoflasche",
+              "menge": 1
+            }
+          ]
+        },
+        {
+          "name": "Elektronik",
+          "gegenstaende": [
+            {
+              "name": "Smartphone + Ladegerät",
+              "menge": 1
+            },
+            {
+              "name": "Powerbank",
+              "menge": 1
+            },
+            {
+              "name": "Steckdosenadapter (Land)",
+              "menge": 1
+            },
+            {
+              "name": "Kopfhörer",
               "menge": 1
             }
           ]
