@@ -85,6 +85,25 @@ def finde_vorlage(vorlagen: List[dict], vorlage_id: str) -> Optional[dict]:
     return None
 
 
+def _reisedauer_tage(start: date, ende: date) -> int:
+    return max(1, (ende - start).days + 1)
+
+
+# Zusammenhang zwischen Reisetagen und empfohlener Menge
+def _berechne_menge(g_item: dict, start: date, ende: date) -> int:
+    try:
+        tage = _reisedauer_tage(start, ende)
+        if "menge_pro_tag" in g_item and g_item["menge_pro_tag"] is not None:
+            faktor = float(g_item.get("menge_pro_tag", 0))
+            menge = int(max(1, round(tage * faktor)))
+            return menge
+        # Fallback: feste Menge
+        menge = int(g_item.get("menge", 1))
+        return max(1, menge)
+    except Exception:
+        return 1
+
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -96,6 +115,7 @@ class ReiseModel(BaseModel):
 
     id = AutoField()
     name = CharField(max_length=200)
+    ziel = CharField(max_length=200)
     startdatum = DateField()
     enddatum = DateField()
     beschreibung = TextField(default="")
@@ -155,6 +175,7 @@ def reise_neu_form():
 @app.post("/reise/neu")
 def reise_neu_submit():
     name = request.form.get("name", "").strip()
+    ziel = request.form.get("ziel", "").strip()
     start = request.form.get("startdatum", "").strip()
     ende = request.form.get("enddatum", "").strip()
     beschreibung = request.form.get("beschreibung", "").strip()
@@ -166,6 +187,7 @@ def reise_neu_submit():
             error="Bitte Name, Start- und Enddatum angeben.",
             form={
                 "name": name,
+                "ziel": ziel,
                 "startdatum": start,
                 "enddatum": ende,
                 "beschreibung": beschreibung,
@@ -182,6 +204,7 @@ def reise_neu_submit():
             error="Enddatum darf nicht vor dem Startdatum liegen.",
             form={
                 "name": name,
+                "ziel": ziel,
                 "startdatum": start,
                 "enddatum": ende,
                 "beschreibung": beschreibung,
@@ -192,6 +215,7 @@ def reise_neu_submit():
 
     r = ReiseModel.create(
         name=name,
+        ziel=ziel,
         startdatum=_parse_date(start),
         enddatum=_parse_date(ende),
         beschreibung=beschreibung,
@@ -211,11 +235,7 @@ def reise_neu_submit():
                     g_name = str(g.get("name", "")).strip()
                     if not g_name:
                         continue
-                    menge = g.get("menge", 1)
-                    try:
-                        menge = max(1, int(menge))
-                    except Exception:
-                        menge = 1
+                    menge = _berechne_menge(g, s, e)
                     GegenstandModel.create(name=g_name, menge=menge, kategorie=kat_row)
     return redirect(url_for("reise_detail", reise_id=r.id))
 
@@ -322,6 +342,12 @@ def ui_index():
             .classes("w-full")
             .props("label-color=grey")
         )
+        ziel = (
+            ui.input("Zielort")
+            .props("clearable")
+            .classes("w-full")
+            .props("label-color=grey")
+        )
         with ui.row().classes("w-full"):
             start = ui.date(value=str(date.today())).classes("flex-1")
             ende = ui.date(value=str(date.today())).classes("flex-1")
@@ -367,6 +393,7 @@ def ui_index():
                         return
                     r = ReiseModel.create(
                         name=(name.value or "").strip(),
+                        ziel=(ziel.value or "").strip(),
                         startdatum=date.fromisoformat(start.value),
                         enddatum=date.fromisoformat(ende.value),
                         beschreibung=beschr.value or "",
@@ -386,10 +413,7 @@ def ui_index():
                                     gname = str(g.get("name", "")).strip()
                                     if not gname:
                                         continue
-                                    try:
-                                        menge = max(1, int(g.get("menge", 1)))
-                                    except Exception:
-                                        menge = 1
+                                    menge = _berechne_menge(g, s, e)
                                     GegenstandModel.create(
                                         name=gname, menge=menge, kategorie=krow
                                     )
