@@ -173,6 +173,22 @@ def reise_neu_submit():
             },
             vorlagen=lade_vorlagen(),
         )
+    s = _parse_date(start)
+    e = _parse_date(ende)
+
+    if e < s:
+        return render_template(
+            "reise_form.html",
+            error="Enddatum darf nicht vor dem Startdatum liegen.",
+            form={
+                "name": name,
+                "startdatum": start,
+                "enddatum": ende,
+                "beschreibung": beschreibung,
+                "vorlage_id": vorlage_id,
+            },
+            vorlagen=lade_vorlagen(),
+        )
 
     r = ReiseModel.create(
         name=name,
@@ -309,6 +325,19 @@ def ui_index():
         with ui.row().classes("w-full"):
             start = ui.date(value=str(date.today())).classes("flex-1")
             ende = ui.date(value=str(date.today())).classes("flex-1")
+
+        def _sync_end_min_and_fix():
+            try:
+                s = date.fromisoformat(start.value)
+                ende.props(f"min={s.isoformat()}")
+                # falls Ende < Start gewählt wurde, automatisch auf Start setzen
+                if date.fromisoformat(ende.value) < s:
+                    ende.value = s.isoformat()
+            except Exception:
+                pass
+
+        start.on_value_change(lambda e: _sync_end_min_and_fix())
+        _sync_end_min_and_fix()
         beschr = ui.textarea("Beschreibung").classes("w-full")
 
         # Vorlagen-Auswahl (Namen anzeigen, ID intern auflösen)
@@ -328,6 +357,14 @@ def ui_index():
 
             def create_reise():
                 try:
+                    s = date.fromisoformat(start.value)
+                    e = date.fromisoformat(ende.value)
+                    if e < s:
+                        ui.notify(
+                            "Enddatum darf nicht vor dem Startdatum liegen.",
+                            type="warning",
+                        )
+                        return
                     r = ReiseModel.create(
                         name=(name.value or "").strip(),
                         startdatum=date.fromisoformat(start.value),
@@ -359,7 +396,7 @@ def ui_index():
 
                     ui.notify(f"Reise „{r.name}“ erstellt", type="positive")
                     dlg_new.close()
-                    refresh()
+                    ui.navigate(f"/reise/{r.id}")
                 except Exception as e:
                     ui.notify(f"Fehler: {e}", type="negative")
 
