@@ -456,11 +456,9 @@ def ui_index():
     def confirm_delete(fn, text="Sicher löschen?"):
         confirm_msg.text = text
 
-        def set_yes():
-            dlg_confirm.close()
-            fn()
+        btn_yes.clear()
 
-        btn_yes.on("click", set_yes)
+        btn_yes.on("click", lambda: (dlg_confirm.close(), fn()))
         dlg_confirm.open()
 
     def delete_reise_by_id(rid: int):
@@ -593,6 +591,10 @@ def ui_reise_detail(reise_id: int):
         GegenstandModel.delete_by_id(item_id)
         refresh()
 
+    def delete_category(kat_id: int):
+        KategorieModel.delete_by_id(kat_id)
+        refresh()
+
     def add_item(kat: "KategorieModel", name: str, menge: int):
         if name.strip():
             GegenstandModel.create(
@@ -617,6 +619,14 @@ def ui_reise_detail(reise_id: int):
                 with ui.card().classes("w-full"):
                     with ui.row().classes("items-center justify-between"):
                         ui.label(kat.name).classes("text-lg font-semibold")
+
+                        ui.button(
+                            icon="delete",
+                            on_click=lambda k_id=kat.id, k_name=kat.name: confirm_delete(
+                                lambda: delete_category(k_id),
+                                text=f"Kategorie „{k_name}“ wirklich löschen?",
+                            ),
+                        ).props("flat round dense")
                         with ui.row().classes("items-center gap-2"):
                             ui.icon("task_alt").classes("opacity-70")
                             ui.label(f"{kat.anzahl_gepackt()}/{kat.anzahl_gesamt()}")
@@ -668,8 +678,9 @@ def ui_reise_detail(reise_id: int):
                         ).classes("w-32")
                         ui.button(
                             "Hinzufügen",
-                            on_click=lambda k=kat: add_item(
-                                k, new_name.value or "", int(new_menge.value or 1)
+                            # Ohne k=kat, nn=new_name,... würde jeder "Hinzufügen"-Button versuchen, nur in die unterste Kategorie einzufügen.
+                            on_click=lambda k=kat, nn=new_name, nm=new_menge: add_item(
+                                k, nn.value or "", int(nm.value or 1)
                             ),
                         ).props("outlined color=primary").style(
                             "background-color: transparent;"
