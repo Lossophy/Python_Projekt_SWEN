@@ -560,31 +560,32 @@ def ui_index():
             ui.notify(f"Fehler: {e}", type="negative")
 
     def card_for_reise(r: ReiseModel):
-        with ui.card().classes("w-full"):
-            with ui.row().classes("items-start justify-between w-full"):
-                with ui.column().classes("gap-1"):
-                    ui.link(r.name, f"/reise/{r.id}").classes(
-                        "text-lg font-semibold text-primary"
-                    ).style("text-decoration: none;")
-                    with ui.row().classes("items-center gap-2"):
-                        ui.icon("event").classes("opacity-70")
-                        ui.label(
-                            f"{r.startdatum.strftime('%d.%m.%Y')} – {r.enddatum.strftime('%d.%m.%Y')}"
-                        )
+        with container:
+            with ui.card().classes("w-full"):
+                with ui.row().classes("items-start justify-between w-full"):
+                    with ui.column().classes("gap-1"):
+                        ui.link(r.name, f"/reise/{r.id}").classes(
+                            "text-lg font-semibold text-primary"
+                        ).style("text-decoration: none;")
+                        with ui.row().classes("items-center gap-2"):
+                            ui.icon("event").classes("opacity-70")
+                            ui.label(
+                                f"{r.startdatum.strftime('%d.%m.%Y')} – {r.enddatum.strftime('%d.%m.%Y')}"
+                            )
 
-                    with ui.row().classes("items-center gap-2"):
-                        ui.icon("task_alt").classes("opacity-70")
-                        ui.linear_progress(value=r.fortschritt_berechnen() / 100).props(
-                            "color=green"
-                        ).classes("my-1 w-full")
-                        ui.label(f"Fortschritt: {r.fortschritt_berechnen()} %")
-                ui.button(
-                    icon="delete",
-                    on_click=lambda rid=r.id: confirm_delete(
-                        lambda: delete_reise_by_id(rid),
-                        text=f"Reise „{r.name}“ wirklich löschen?",
-                    ),
-                ).props("flat round")
+                        with ui.row().classes("items-center gap-2"):
+                            ui.icon("task_alt").classes("opacity-70")
+                            ui.linear_progress(
+                                value=r.fortschritt_berechnen() / 100
+                            ).props("color=green").classes("my-1 w-full")
+                            ui.label(f"Fortschritt: {r.fortschritt_berechnen()} %")
+                    ui.button(
+                        icon="delete",
+                        on_click=lambda rid=r.id: confirm_delete(
+                            lambda: delete_reise_by_id(rid),
+                            text=f"Reise „{r.name}“ wirklich löschen?",
+                        ),
+                    ).props("flat round")
 
     def refresh():
         container.clear()
