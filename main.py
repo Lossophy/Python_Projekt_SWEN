@@ -158,6 +158,69 @@ class GegenstandModel(BaseModel):
     )
 
 
+# Reise-Objekt in ein verschachteltes Dict (für JSON) umwandeln.
+def export_reise_to_dict(r: ReiseModel) -> dict:
+    return {
+        "name": r.name,
+        "ziel": r.ziel,
+        "startdatum": r.startdatum.isoformat(),
+        "enddatum": r.enddatum.isoformat(),
+        "beschreibung": r.beschreibung,
+        "kategorien": [
+            {
+                "name": kat.name,
+                "gegenstaende": [
+                    {
+                        "name": g.name,
+                        "menge": int(g.menge),
+                        "gepackt": bool(g.gepackt),
+                    }
+                    for g in kat.gegenstaende.order_by(GegenstandModel.id)
+                ],
+            }
+            for kat in r.kategorien.order_by(KategorieModel.id)
+        ],
+    }
+
+
+# Aus einem Dict (JSON) eine neue Reise inkl. Kategorien & Gegenständen anlegen.
+def import_reise_from_dict(data: dict) -> ReiseModel:
+
+    start = data.get("startdatum") or date.today().isoformat()
+    ende = data.get("enddatum") or start
+
+    r = ReiseModel.create(
+        name=data.get("name", "Importierte Reise"),
+        ziel=data.get("ziel", ""),
+        startdatum=_parse_date(start),
+        enddatum=_parse_date(ende),
+        beschreibung=data.get("beschreibung", ""),
+    )
+
+    for k in data.get("kategorien", []):
+        kat = KategorieModel.create(
+            name=k.get("name", "Kategorie"),
+            reise=r,
+        )
+        for g in k.get("gegenstaende", []):
+            name = (g.get("name") or "").strip()
+            if not name:
+                continue
+            menge = g.get("menge", 1)
+            try:
+                menge = max(1, int(menge))
+            except Exception:
+                menge = 1
+            GegenstandModel.create(
+                name=name,
+                menge=menge,
+                gepackt=bool(g.get("gepackt", False)),
+                kategorie=kat,
+            )
+
+    return r
+
+
 # === Flask-Routen (bestehend) ================================================
 
 
@@ -420,7 +483,7 @@ def ui_index():
 
                     ui.notify(f"Reise „{r.name}“ erstellt", type="positive")
                     dlg_new.close()
-                    ui.navigate(f"/reise/{r.id}")
+                    ui.navigate.to(f"/reise/{r.id}")
                 except Exception as e:
                     ui.notify(f"Fehler: {e}", type="negative")
 
@@ -428,13 +491,40 @@ def ui_index():
                 "outlined color=primary"
             ).style("background-color: transparent;")
 
+    with ui.dialog() as dlg_import, ui.card().classes("w-[520px]"):
+        ui.label("Reise importieren").classes("text-lg font-semibold")
+        import_area = ui.textarea("Hier den exportierten Text einfügen").classes(
+            "w-full h-64"
+        )
+
+        def do_import():
+            try:
+                raw = import_area.value or ""
+                data = json.loads(raw)
+                new_reise = import_reise_from_dict(data)
+                ui.notify(f"Reise „{new_reise.name}“ importiert", type="positive")
+                dlg_import.close()
+                ui.navigate.to(f"/reise/{new_reise.id}")
+            except Exception as e:
+                ui.notify(f"Import fehlgeschlagen: {e}", type="negative")
+
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Abbrechen", on_click=dlg_import.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
+            ui.button("Importieren", on_click=do_import).props("color=primary")
+
     # -- Toolbar ----------------------------------------------------------------
     with ui.row().classes("gap-3 items-center mb-2"):
         # Button 1: Neue Reise (Outline-Stil: Rand und Text in #5898d4)
         ui.button("Neue Reise", on_click=dlg_new.open).props(
             "outlined color=primary"
         ).style("background-color: transparent;")
-        # Button 2: Neu laden (Outline-Stil: Rand und Text in #5898d4)
+        # Button 2: Reise importieren (Outline-Stil: Rand und Text in #5898d4)
+        ui.button("Reise importieren", on_click=dlg_import.open).props(
+            "outlined color=primary"
+        ).style("background-color: transparent;")
+        # Button 3: Neu laden (Outline-Stil: Rand und Text in #5898d4)
         ui.button("Neu laden", on_click=lambda: refresh()).props(
             "outlined color=primary"
         ).style("background-color: transparent;")
@@ -481,6 +571,7 @@ def ui_index():
                         ui.label(
                             f"{r.startdatum.strftime('%d.%m.%Y')} – {r.enddatum.strftime('%d.%m.%Y')}"
                         )
+
                     with ui.row().classes("items-center gap-2"):
                         ui.icon("task_alt").classes("opacity-70")
                         ui.linear_progress(value=r.fortschritt_berechnen() / 100).props(
@@ -536,6 +627,57 @@ def ui_reise_detail(reise_id: int):
         .classes("my-2")
     )
     ui.separator()
+
+    # Import und Export Buttons
+    # --- Export / Import (Reise teilen) --------------------------------------
+    # Dialog für Export
+    with ui.dialog() as dlg_export, ui.card().classes("w-[520px]"):
+        ui.label("Reise exportieren").classes("text-lg font-semibold")
+        export_area = ui.textarea("Export-Daten").classes("w-full h-64")
+        ui.label(
+            "Text markieren, kopieren und z.B. per WhatsApp oder Mail verschicken."
+        ).classes("text-sm text-gray-500 mt-1")
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Schließen", on_click=dlg_export.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
+
+    # Dialog für Import
+    with ui.dialog() as dlg_import, ui.card().classes("w-[520px]"):
+        ui.label("Reise importieren").classes("text-lg font-semibold")
+        import_area = ui.textarea("Hier den exportierten Text einfügen").classes(
+            "w-full h-64"
+        )
+
+        def do_import():
+            try:
+                raw = import_area.value or ""
+                data = json.loads(raw)
+                new_reise = import_reise_from_dict(data)
+                ui.notify(f"Reise „{new_reise.name}“ importiert", type="positive")
+                dlg_import.close()
+                ui.navigate.to(f"/reise/{new_reise.id}")
+            except Exception as e:
+                ui.notify(f"Import fehlgeschlagen: {e}", type="negative")
+
+        with ui.row().classes("justify-end w-full mt-2"):
+            ui.button("Abbrechen", on_click=dlg_import.close).props(
+                "outlined color=primary"
+            ).style("background-color: transparent;")
+            ui.button("Importieren", on_click=do_import).props("color=primary")
+
+    # Funktion, um aktuelle Reise als JSON in den Export-Dialog zu schreiben
+    def open_export():
+        r_current = ReiseModel.get_by_id(reise_id)
+        data = export_reise_to_dict(r_current)
+        export_area.value = json.dumps(data, ensure_ascii=False, indent=2)
+        dlg_export.open()
+
+    # Sichtbare Buttons auf der Detailseite
+    with ui.row().classes("gap-2 mt-2 max-w-screen-md mx-auto"):
+        ui.button("Reise exportieren", on_click=open_export).props(
+            "outlined color=primary"
+        ).style("background-color: transparent;")
 
     # Kategorie anlegen
     with ui.expansion("Kategorie hinzufügen").classes("w-full max-w-screen-md mx-auto"):
