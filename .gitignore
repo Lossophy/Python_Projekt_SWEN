@@ -20,3 +20,9 @@ lib64/
 # SQLite databases
 *.db
 *.sqlite3
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
