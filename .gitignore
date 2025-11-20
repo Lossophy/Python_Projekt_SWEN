@@ -26,3 +26,6 @@ venv/
 env/
 .venv/
 .env/
+
+# NiceGUI storage
+.nicegui/
