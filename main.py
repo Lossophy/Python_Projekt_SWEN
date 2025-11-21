@@ -212,6 +212,11 @@ def ui_index():
             # Erstellt die Reise in der DB
             def create_reise():
                 try:
+                    clean_name = (name.value or "").strip()
+                    if not clean_name:
+                        ui.notify("Bitte einen Namen für die Reise eingeben!", type="warning")
+                        return
+
                     s = date.fromisoformat(start.value)
                     e = date.fromisoformat(ende.value)
                     if e < s:

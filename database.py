@@ -34,14 +34,15 @@ class ReiseModel(BaseModel):
     beschreibung = TextField(default="")
 
     # Berechnet, wie viel Prozent der Items gepackt sind
-    def fortschritt_berechnen(self) -> float:
+    def fortschritt_berechnen(self) -> int:  # Typ-Hint auf int geändert
         total = sum(len(k.gegenstaende) for k in self.kategorien)
         if total == 0:
-            return 0.0
+            return 0
         gepackt = sum(
             sum(1 for g in k.gegenstaende if g.gepackt) for k in self.kategorien
         )
-        return round(gepackt / total * 100.0, 2)
+        # Erst runden, dann in Integer (Ganzzahl) umwandeln
+        return int(round(gepackt / total * 100))
 
 
 # Eine Kategorie (z.B. "Kleidung") gehört zu einer Reise
