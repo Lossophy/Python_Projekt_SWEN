@@ -21,7 +21,7 @@ Mit **PackAttack** wollen wir genau das vermeiden. Wir haben eine App programmie
 
 *   **Python** (Backend Logik)
 *   **NiceGUI** (Web-Framework & UI)
-*   **SQLite** (Datenbank)
+*   **SQLite** (Datenbank via Peewee ORM)
 
 ## 🚀 Installation & Start
 
@@ -31,7 +31,7 @@ Folge diesen Schritten, um die App lokal laufen zu lassen:
    ```bash
    git clone https://github.com/Lossophy/Python_Projekt_SWEN.git
 
-   cd Python_Project_SWEN
+   cd Python_Projekt_SWEN
    ```
 
 2. **Virtuelle Umgebung erstellen & aktivieren**
@@ -61,15 +61,10 @@ Folge diesen Schritten, um die App lokal laufen zu lassen:
 ```bash
 Python_Project_SWEN/
 ├── assets/          # Bilder etc.
-├── Backend/         # Die interne Programmlogik
-│   ├── backend.py   # Steuerungslogik und Funktionen
-│   └── daten.py     # Definition der Datenklassen/Modelle
-├── templates/       # Layout der Seiten
-│   ├── base.html    # Grundgerüst für alle Seiten
-│   └── ...          # Weitere Templates
-├── Draft/           # Entwürfe und temporäre Dateien
+├── Draft/           # Archiv: Alte Entwürfe (z.B. Flask-Lösung)
 ├── app.db           # SQLite-Datenbank
-├── main.py          # 🚀 Startpunkt der App
+├── database.py      # Definition der Datenmodelle
+├── main.py          # 🚀 Startpunkt: UI-Logik & Routing
 ├── requirements.txt # Liste aller benötigten Bibliotheken
 ├── vorlagen.json    # Speichert die Standard-Packlisten
 ├── setup.cfg        # Config für Code-Qualitätstools (Flake8)
