@@ -1,8 +1,11 @@
 import sys
+import json
 import importlib.util
 import unittest
+from unittest import mock
 from pathlib import Path
 from datetime import date
+from tempfile import NamedTemporaryFile
 from peewee import SqliteDatabase
 
 # Skip cleanly if NiceGUI is not available in the environment.
@@ -17,6 +20,10 @@ from database import db, ReiseModel, KategorieModel, GegenstandModel
 from main import (
     _berechne_menge,
     _reisedauer_tage,
+    _parse_date,
+    _vorlagen_datei,
+    lade_vorlagen,
+    finde_vorlage,
     export_reise_to_dict,
     import_reise_from_dict,
 )
@@ -77,3 +84,60 @@ class TestPackAttack(unittest.TestCase):
         self.assertEqual(imported_item.name, "Socken")
         self.assertEqual(imported_item.menge, 3)
         self.assertTrue(imported_item.gepackt)
+
+    def test_parse_date_valid_and_invalid(self):
+        self.assertEqual(_parse_date("2024-05-10"), date(2024, 5, 10))
+        with self.assertRaises(ValueError):
+            _parse_date("10.05.2024")
+
+    def test_lade_vorlagen_from_temp_file(self):
+        payload = {
+            "vorlagen": [
+                {
+                    "id": "v1",
+                    "name": "Test",
+                    "kategorien": [{"name": "K1", "gegenstaende": []}],
+                }
+            ]
+        }
+        with NamedTemporaryFile("w+", delete=True, suffix=".json") as tmp:
+            tmp.write(json.dumps(payload))
+            tmp.flush()
+            with mock.patch("main._vorlagen_datei", return_value=Path(tmp.name)):
+                vorlagen = lade_vorlagen()
+        self.assertEqual(len(vorlagen), 1)
+        self.assertEqual(vorlagen[0]["id"], "v1")
+        self.assertEqual(vorlagen[0]["name"], "Test")
+
+    def test_lade_vorlagen_invalid_json_returns_empty(self):
+        with NamedTemporaryFile("w+", delete=True, suffix=".json") as tmp:
+            tmp.write("{this is invalid json")
+            tmp.flush()
+            with mock.patch("main._vorlagen_datei", return_value=Path(tmp.name)):
+                vorlagen = lade_vorlagen()
+        self.assertEqual(vorlagen, [])
+
+    def test_finde_vorlage(self):
+        data = [{"id": "a", "name": "A"}, {"id": "b", "name": "B"}]
+        self.assertEqual(finde_vorlage(data, "b")["name"], "B")
+        self.assertIsNone(finde_vorlage(data, "x"))
+
+    def test_fortschritt_berechnen_and_kat_counts(self):
+        r = ReiseModel.create(
+            name="Trip",
+            ziel="B",
+            startdatum=date(2024, 1, 1),
+            enddatum=date(2024, 1, 1),
+            beschreibung="",
+        )
+        kat = KategorieModel.create(name="K1", reise=r)
+        self.assertEqual(kat.anzahl_gesamt(), 0)
+        self.assertEqual(kat.anzahl_gepackt(), 0)
+
+        GegenstandModel.create(name="A", menge=1, gepackt=False, kategorie=kat)
+        GegenstandModel.create(name="B", menge=1, gepackt=True, kategorie=kat)
+
+        self.assertEqual(kat.anzahl_gesamt(), 2)
+        self.assertEqual(kat.anzahl_gepackt(), 1)
+        # 1 von 2 gepackt -> 50%
+        self.assertEqual(r.fortschritt_berechnen(), 50)
