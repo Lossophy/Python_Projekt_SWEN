@@ -8,25 +8,29 @@ from datetime import date
 from tempfile import NamedTemporaryFile
 from peewee import SqliteDatabase
 
-# Skip cleanly if NiceGUI is not available in the environment.
-NICEGUI_AVAILABLE = importlib.util.find_spec("nicegui") is not None
-
 # Ensure project root is on the import path for test runs.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Skip cleanly if NiceGUI (dependency of main.py) is not available in the environment.
+NICEGUI_AVAILABLE = importlib.util.find_spec("nicegui") is not None
+if NICEGUI_AVAILABLE:
+    from main import (
+        _berechne_menge,
+        _reisedauer_tage,
+        _parse_date,
+        _vorlagen_datei,
+        lade_vorlagen,
+        finde_vorlage,
+        export_reise_to_dict,
+        import_reise_from_dict,
+    )
+else:
+    # Raise SkipTest at import time so unittest discovery still registers the module.
+    raise unittest.SkipTest("NiceGUI not installed; skipping PackAttack tests.")
+
 from database import db, ReiseModel, KategorieModel, GegenstandModel
-from main import (
-    _berechne_menge,
-    _reisedauer_tage,
-    _parse_date,
-    _vorlagen_datei,
-    lade_vorlagen,
-    finde_vorlage,
-    export_reise_to_dict,
-    import_reise_from_dict,
-)
 
 
 # Use an in-memory SQLite database for isolated tests.
