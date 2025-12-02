@@ -60,7 +60,8 @@ class TestPackAttack(unittest.TestCase):
         item = {"menge_pro_tag": 1.5}
         start = date(2024, 1, 1)
         ende = date(2024, 1, 4)
-        self.assertEqual(_berechne_menge(item, start, ende), 5)  # 4 Tage * 1.5 gerundet
+        # 4 Tage * 1.5 = 6.0, gerundet auf 6
+        self.assertEqual(_berechne_menge(item, start, ende), 6)
 
     def test_berechne_menge_feste_menge(self):
         item = {"menge": 2}
@@ -104,21 +105,27 @@ class TestPackAttack(unittest.TestCase):
                 }
             ]
         }
-        with NamedTemporaryFile("w+", delete=True, suffix=".json") as tmp:
+        tmp = NamedTemporaryFile("w+", delete=False, suffix=".json")
+        try:
             tmp.write(json.dumps(payload))
-            tmp.flush()
+            tmp.close()  # ensure other readers (Path.read_text) can open it on Windows
             with mock.patch("main._vorlagen_datei", return_value=Path(tmp.name)):
                 vorlagen = lade_vorlagen()
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
         self.assertEqual(len(vorlagen), 1)
         self.assertEqual(vorlagen[0]["id"], "v1")
         self.assertEqual(vorlagen[0]["name"], "Test")
 
     def test_lade_vorlagen_invalid_json_returns_empty(self):
-        with NamedTemporaryFile("w+", delete=True, suffix=".json") as tmp:
+        tmp = NamedTemporaryFile("w+", delete=False, suffix=".json")
+        try:
             tmp.write("{this is invalid json")
-            tmp.flush()
+            tmp.close()
             with mock.patch("main._vorlagen_datei", return_value=Path(tmp.name)):
                 vorlagen = lade_vorlagen()
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
         self.assertEqual(vorlagen, [])
 
     def test_finde_vorlage(self):
